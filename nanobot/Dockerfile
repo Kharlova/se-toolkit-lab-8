@@ -13,6 +13,7 @@ COPY --from=workspace pyproject.toml uv.lock /app/
 
 # Copy workspace packages
 COPY --from=workspace mcp/mcp-lms /app/mcp/mcp-lms
+COPY --from=workspace mcp/mcp-obs /app/mcp/mcp-obs
 COPY --from=workspace nanobot-websocket-channel /app/nanobot-websocket-channel
 
 # Copy nanobot package
@@ -22,8 +23,8 @@ COPY . /app/nanobot
 # Install nanobot with dependencies
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --package nanobot
 
-# Install webchat packages in the venv using uv pip
-RUN --mount=type=cache,target=/root/.cache/uv uv pip install nanobot-websocket-channel/nanobot-webchat nanobot-websocket-channel/mcp-webchat nanobot-websocket-channel/nanobot-channel-protocol
+# Install webchat and obs packages in the venv using uv pip
+RUN --mount=type=cache,target=/root/.cache/uv uv pip install nanobot-websocket-channel/nanobot-webchat nanobot-websocket-channel/mcp-webchat nanobot-websocket-channel/nanobot-channel-protocol mcp/mcp-obs
 
 # ---
 # Stage 2: Final runtime image
