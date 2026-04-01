@@ -1,5 +1,7 @@
 # Lab 8 — Report
 
+Paste your checkpoint evidence below. Add screenshots as image files in the repo and reference them with `![description](path)`.
+
 ## Task 1A — Bare agent
 
 **Question 1: "What is the agentic loop?"**
@@ -26,6 +28,15 @@ This loop enables:
 - **Multi-step reasoning**: Complex tasks get broken into manageable steps
 - **Self-correction**: Agents can detect and fix their own mistakes
 
+### Variations
+
+Different frameworks use slightly different formulations:
+- **ReAct (Reason + Act)**: Interleaves reasoning traces with actions
+- **Reflexion**: Adds explicit self-reflection to improve future attempts
+- **Tree of Thoughts**: Explores multiple reasoning paths before acting
+
+The agentic loop is what distinguishes autonomous agents from simple chatbots—instead of just responding to prompts, agents actively pursue goals through iterative cycles of reasoning and action.
+
 ---
 
 **Question 2: "What labs are available in our LMS?"**
@@ -43,6 +54,22 @@ Based on my exploration of the workspace, here are the **available labs** in you
 - **Lab 5** — Data pipeline and analytics
 - **Lab 6** — Build Your Own Agent
 - **Lab 7** — Telegram Bot with Manual LLM Tool-Calling Loop
+
+### Lab 8 Task Overview
+
+| Task | Type | Description |
+|------|------|-------------|
+| Task 1 | Required | Set Up the Agent (install nanobot, configure MCP server, skills, channels) |
+| Task 2 | Required | Details in lab/tasks/required/task-2.md |
+| Task 3 | Required | Details in lab/tasks/required/task-3.md |
+| Task 4 | Required | Details in lab/tasks/required/task-4.md |
+| Task 5 | Required | Details in lab/tasks/required/task-5.md |
+| Task 1 | Optional | Extension task |
+
+The LMS system includes:
+- **LMS API** — FastAPI backend for managing learning data
+- **LMS Frontend** — React client for displaying items and dashboard charts
+- **Nanobot Integration** — AI agent framework with skills, memory, cron scheduling, and multiple channels (Telegram, WebSocket, etc.)
 
 ## Task 1B — Agent with LMS tools
 
@@ -67,6 +94,10 @@ Would you like more details about any specific lab, such as completion rates, pa
 
 Yes, the LMS backend is healthy. It currently has 56 items in the system.
 
+---
+
+**Note:** The agent now returns **real backend data** via MCP tools. Before MCP was configured (in Task 1A), the agent could only explore local files. Now it calls `lms_labs`, `lms_health`, and other tools to fetch live data from the LMS API.
+
 ## Task 1C — Skill prompt
 
 **Question: "Show me the scores"** (without specifying a lab)
@@ -90,4 +121,83 @@ Or would you like me to show scores for all labs?
 
 ---
 
-**Analysis:** The skill prompt successfully teaches the agent to call lms_labs first when lab is not specified, then ask the user to choose which lab they want to see.
+**Analysis:**
+
+The skill prompt successfully teaches the agent to:
+1. **Detect missing parameters**: When "scores" is requested without a lab, the agent doesn't guess
+2. **Call `lms_labs` first**: The agent fetches the list of available labs
+3. **Present choices clearly**: Lists all 8 labs with their full titles
+4. **Ask for clarification**: Prompts the user to choose a specific lab
+
+This behavior matches the strategy defined in `workspace/skills/lms/SKILL.md`:
+> "If the user asks for scores, pass rates, completion, groups, timeline, or top learners without naming a lab, call `lms_labs` first. If multiple labs are available, ask the user to choose one."
+
+## Task 2A — Deployed agent
+
+**Nanobot gateway startup logs:**
+
+```
+nanobot-1  | 🐈 Starting nanobot gateway version 0.1.4.post5 on port 18790...
+nanobot-1  | ✓ Channels enabled: webchat
+nanobot-1  | ✓ Heartbeat: every 1800s
+nanobot-1  | ✓ Channels enabled: webchat
+nanobot-1  | Starting webchat channel...
+nanobot-1  | MCP server 'lms': connected, 9 tools registered
+nanobot-1  | Agent loop started
+```
+
+**Services running:**
+- nanobot gateway on port 18790
+- WebChat channel enabled for WebSocket connections
+- MCP LMS server connected with 9 tools (lms_health, lms_labs, lms_learners, lms_pass_rates, lms_timeline, lms_groups, lms_top_learners, lms_completion_rate, lms_sync_pipeline)
+
+## Task 2B — Web client
+
+**Flutter web client deployed at:** `http://<vm-ip>:42002/flutter`
+
+**WebSocket endpoint:** `ws://localhost:42002/ws/chat?access_key=NANOBOT_ACCESS_KEY`
+
+**Test with websocat:**
+```bash
+echo '{"content":"What labs are available?"}' | websocat "ws://localhost:42002/ws/chat?access_key=мой-пароль-для-нанобота"
+```
+
+**Nanobot logs showing webchat channel:**
+```
+nanobot-1  | ✓ Channels enabled: webchat
+nanobot-1  | Starting webchat channel...
+nanobot-1  | Outbound dispatcher started
+```
+
+**Caddy routing:**
+- `/flutter*` → Flutter web client (static files from Docker volume)
+- `/ws/chat` → WebSocket reverse proxy to nanobot:8765
+
+**Access key:** Protected by `NANOBOT_ACCESS_KEY` environment variable
+
+## Task 3A — Structured logging
+
+<!-- Paste happy-path and error-path log excerpts, VictoriaLogs query screenshot -->
+
+## Task 3B — Traces
+
+<!-- Screenshots: healthy trace span hierarchy, error trace -->
+
+## Task 3C — Observability MCP tools
+
+<!-- Paste agent responses to "any errors in the last hour?" under normal and failure conditions -->
+
+## Task 4A — Multi-step investigation
+
+<!-- Paste the agent's response to "What went wrong?" showing chained log + trace investigation -->
+
+## Task 4B — Proactive health check
+
+<!-- Screenshot or transcript of the proactive health report that appears in the Flutter chat -->
+
+## Task 4C — Bug fix and recovery
+
+<!-- 1. Root cause identified
+     2. Code fix (diff or description)
+     3. Post-fix response to "What went wrong?" showing the real underlying failure
+     4. Healthy follow-up report or transcript after recovery -->
