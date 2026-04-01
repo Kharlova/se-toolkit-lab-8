@@ -6,6 +6,7 @@ requires-python = "==3.14.*"
 members = [
     "lms-backend",
     "mcp-lms",
+    "mcp-obs",
     "nanobot",
     "qwen-code-api",
 ]
@@ -928,6 +929,21 @@ requires-dist = [
 ]
 
 [[package]]
+name = "mcp-obs"
+version = "0.1.0"
+source = { editable = "mcp/mcp-obs" }
+dependencies = [
+    { name = "httpx" },
+    { name = "mcp" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.25.0" },
+    { name = "mcp", specifier = ">=1.0.0" },
+]
+
+[[package]]
 name = "mdurl"
 version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1013,12 +1029,14 @@ version = "0.1.0"
 source = { virtual = "nanobot" }
 dependencies = [
     { name = "mcp-lms" },
+    { name = "mcp-obs" },
     { name = "nanobot-ai" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "mcp-lms", editable = "mcp/mcp-lms" },
+    { name = "mcp-obs", editable = "mcp/mcp-obs" },
     { name = "nanobot-ai", url = "https://github.com/HKUDS/nanobot/archive/e7d371ec1e6531b28898ec2c869ef338e8dd46ec.zip" },
 ]
 

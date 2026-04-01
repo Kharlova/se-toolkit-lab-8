@@ -1,6 +1,7 @@
 [tool.uv.workspace]
 members = [
   "backend",
+  "mcp/mcp-obs",
   "qwen-code-api",
   "mcp/mcp-lms",
   "nanobot",
@@ -14,6 +15,7 @@ members = [
 
 [tool.uv.sources]
 mcp-lms = { path = "mcp/mcp-lms", editable = true }
+mcp-obs = { path = "mcp/mcp-obs", editable = true }
 
 # Uncomment these later in the lab after you add the matching repos/packages.
 
