@@ -157,16 +157,13 @@ nanobot-1  | Agent loop started
 
 **WebSocket endpoint:** `ws://localhost:42002/ws/chat?access_key=NANOBOT_ACCESS_KEY`
 
-**Test with websocat:**
-```bash
-echo '{"content":"What labs are available?"}' | websocat "ws://localhost:42002/ws/chat?access_key=мой-пароль-для-нанобота"
-```
-
 **Nanobot logs showing webchat channel:**
 ```
 nanobot-1  | ✓ Channels enabled: webchat
 nanobot-1  | Starting webchat channel...
 nanobot-1  | Outbound dispatcher started
+nanobot-1  | MCP server 'lms': connected, 9 tools registered
+nanobot-1  | Agent loop started
 ```
 
 **Caddy routing:**
@@ -174,6 +171,40 @@ nanobot-1  | Outbound dispatcher started
 - `/ws/chat` → WebSocket reverse proxy to nanobot:8765
 
 **Access key:** Protected by `NANOBOT_ACCESS_KEY` environment variable
+
+**Test conversation:**
+
+```bash
+$ echo '{"content":"What labs are available?"}' | websocat "ws://localhost:42002/ws/chat?access_key=мой-пароль-для-нанобота"
+```
+
+**Actual agent response received via WebSocket:**
+```json
+{
+  "type": "text",
+  "content": "Here are the available labs:\n\n1. **Lab 01** – Products, Architecture & Roles\n2. **Lab 02** — Run, Fix, and Deploy a Backend Service\n3. **Lab 03** — Backend API: Explore, Debug, Implement, Deploy\n4. **Lab 04** — Testing, Front-end, and AI Agents\n5. **Lab 05** — Data Pipeline and Analytics Dashboard\n6. **Lab 06** — Build Your Own Agent\n7. **Lab 07** — Build a Client with an AI Coding Agent\n8. **Lab 08** — lab-08\n\nWould you like to see details about a specific lab, such as pass rates, completion rates, submission timeline, group performance, or top learners?",
+  "format": "markdown"
+}
+```
+
+**Rendered response:**
+> Here are the available labs:
+> 
+> 1. **Lab 01** – Products, Architecture & Roles
+> 2. **Lab 02** — Run, Fix, and Deploy a Backend Service
+> 3. **Lab 03** — Backend API: Explore, Debug, Implement, Deploy
+> 4. **Lab 04** — Testing, Front-end, and AI Agents
+> 5. **Lab 05** — Data Pipeline and Analytics Dashboard
+> 6. **Lab 06** — Build Your Own Agent
+> 7. **Lab 07** — Build a Client with an AI Coding Agent
+> 8. **Lab 08** — lab-08
+> 
+> Would you like to see details about a specific lab, such as pass rates, completion rates, submission timeline, group performance, or top learners?
+
+**Verification:**
+- Flutter serves main.dart.js at /flutter ✓
+- WebSocket endpoint accepts connections at /ws/chat ✓
+- Nanobot gateway running with webchat channel enabled ✓
 
 ## Task 3A — Structured logging
 
