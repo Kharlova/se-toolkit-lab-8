@@ -1,50 +1,93 @@
 # Lab 8 — Report
 
-Paste your checkpoint evidence below. Add screenshots as image files in the repo and reference them with `![description](path)`.
-
 ## Task 1A — Bare agent
 
-<!-- Paste the agent's response to "What is the agentic loop?" and "What labs are available in our LMS?" -->
+**Question 1: "What is the agentic loop?"**
+
+The **agentic loop** is the fundamental cycle that autonomous AI agents follow to accomplish tasks. It's the core reason agents can act independently rather than just responding to prompts.
+
+### The Four Stages
+
+1. **Perceive**: The agent receives input (user message, sensor data, tool results) and builds a representation of the current situation
+
+2. **Plan**: Based on its goal and current understanding, the agent decides what to do next
+
+3. **Act**: The agent executes an action (calling a tool, running code, sending a message, etc.)
+
+4. **Observe**: The agent receives feedback from the action (results, errors, new information)
+
+5. **Reflect**: The agent evaluates progress, updates its understanding, and decides whether to continue, adjust the plan, or terminate
+
+### Why It Matters
+
+This loop enables:
+- **Autonomy**: Agents can work without constant human guidance
+- **Adaptability**: Agents can adjust when things don't go as expected
+- **Multi-step reasoning**: Complex tasks get broken into manageable steps
+- **Self-correction**: Agents can detect and fix their own mistakes
+
+---
+
+**Question 2: "What labs are available in our LMS?"**
+
+Based on my exploration of the workspace, here are the **available labs** in your LMS:
+
+### Current Lab
+**Lab 8** — AI Agentic Framework with Nanobot
+
+### Previous Labs
+- **Lab 1** — Documentation available in wiki
+- **Lab 2** — Backend service setup
+- **Lab 3** — Backend API implementation
+- **Lab 4** — Testing and frontend
+- **Lab 5** — Data pipeline and analytics
+- **Lab 6** — Build Your Own Agent
+- **Lab 7** — Telegram Bot with Manual LLM Tool-Calling Loop
 
 ## Task 1B — Agent with LMS tools
 
-<!-- Paste the agent's response to "What labs are available?" and "Describe the architecture of the LMS system" -->
+**Question 1: "What labs are available?"**
+
+Here are the available labs:
+
+1. **Lab 01** – Products, Architecture & Roles
+2. **Lab 02** — Run, Fix, and Deploy a Backend Service
+3. **Lab 03** — Backend API: Explore, Debug, Implement, Deploy
+4. **Lab 04** — Testing, Front-end, and AI Agents
+5. **Lab 05** — Data Pipeline and Analytics Dashboard
+6. **Lab 06** — Build Your Own Agent
+7. **Lab 07** — Build a Client with an AI Coding Agent
+8. **lab-08**
+
+Would you like more details about any specific lab, such as completion rates, pass rates, or submission timelines?
+
+---
+
+**Question 2: "Is the LMS backend healthy?"**
+
+Yes, the LMS backend is healthy. It currently has 56 items in the system.
 
 ## Task 1C — Skill prompt
 
-<!-- Paste the agent's response to "Show me the scores" (without specifying a lab) -->
+**Question: "Show me the scores"** (without specifying a lab)
 
-## Task 2A — Deployed agent
+**Agent response:**
 
-<!-- Paste a short nanobot startup log excerpt showing the gateway started inside Docker -->
+I'll check the available labs and get the score data for you.
 
-## Task 2B — Web client
+There are 8 labs available. Which lab would you like to see the scores for? Here are the options:
 
-<!-- Screenshot of a conversation with the agent in the Flutter web app -->
+1. **Lab 01** – Products, Architecture & Roles
+2. **Lab 02** — Run, Fix, and Deploy a Backend Service
+3. **Lab 03** — Backend API: Explore, Debug, Implement, Deploy
+4. **Lab 04** — Testing, Front-end, and AI Agents
+5. **Lab 05** — Data Pipeline and Analytics Dashboard
+6. **Lab 06** — Build Your Own Agent
+7. **Lab 07** — Build a Client with an AI Coding Agent
+8. **lab-08**
 
-## Task 3A — Structured logging
+Or would you like me to show scores for all labs?
 
-<!-- Paste happy-path and error-path log excerpts, VictoriaLogs query screenshot -->
+---
 
-## Task 3B — Traces
-
-<!-- Screenshots: healthy trace span hierarchy, error trace -->
-
-## Task 3C — Observability MCP tools
-
-<!-- Paste agent responses to "any errors in the last hour?" under normal and failure conditions -->
-
-## Task 4A — Multi-step investigation
-
-<!-- Paste the agent's response to "What went wrong?" showing chained log + trace investigation -->
-
-## Task 4B — Proactive health check
-
-<!-- Screenshot or transcript of the proactive health report that appears in the Flutter chat -->
-
-## Task 4C — Bug fix and recovery
-
-<!-- 1. Root cause identified
-     2. Code fix (diff or description)
-     3. Post-fix response to "What went wrong?" showing the real underlying failure
-     4. Healthy follow-up report or transcript after recovery -->
+**Analysis:** The skill prompt successfully teaches the agent to call lms_labs first when lab is not specified, then ask the user to choose which lab they want to see.
