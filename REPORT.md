@@ -346,7 +346,181 @@ Tool call: mcp_obs_traces_get({"trace_id": "577edf9d2cf33a94d59ffe0551ec4ef6"})
 
 ## Task 4A — Multi-step investigation
 
-<!-- Paste the agent's response to "What went wrong?" showing chained log + trace investigation -->
+**Agent response to "What went wrong?" (with PostgreSQL stopped):**
+
+```
+I'll investigate what went wrong by checking recent errors and traces.
+
+**Found 1 error in the last hour:**
+
+**Error details:**
+- Service: Learning Management Service
+- Time: 2026-04-01 19:45:33
+- Error: "(sqlalchemy.dialects.postgresql.asyncpg.InterfaceError): connection is closed"
+- Trace ID: 577edf9d2cf33a94d59ffe0551ec4ef6
+
+**Trace analysis:**
+The trace shows the failure occurred at the db_query span.
+The SELECT operation on the item table failed with "connection is closed" error.
+
+**Root cause:**
+The PostgreSQL database connection was closed. The backend attempted to execute
+a SELECT query on the item table, but the database connection is no longer available.
+This is causing all database-backed operations to fail.
+
+**Important discrepancy:**
+The backend router is catching this database error and incorrectly reporting it as
+"404 Items not found" instead of surfacing the real database connection failure.
+This masks the true root cause from users and monitoring systems.
+
+**Recommendation:**
+1. Restart PostgreSQL service to restore database connectivity
+2. Fix the backend error handler in routers/items.py to properly surface database errors
+   instead of converting them to 404 responses
+```
+
+**Tool calls observed:**
+```
+Tool call: mcp_obs_logs_error_count({"time_window": "1h"})
+Tool call: mcp_obs_logs_search({"query": "_time:1h severity:ERROR", "limit": 10})
+Tool call: mcp_obs_traces_get({"trace_id": "577edf9d2cf33a94d59ffe0551ec4ef6"})
+```
+
+---
+
+## Task 4B — Proactive health check
+
+**Scheduled job created:**
+
+```
+Job: health-check
+Schedule: every 2 minutes
+Action: Check for LMS backend errors in last 2 minutes
+Output: Posts health summary to current chat
+```
+
+**Proactive health report (while PostgreSQL stopped):**
+
+```
+**Health Check Report - 20:45:00**
+
+❌ UNHEALTHY: Found 1 error in the last 2 minutes.
+
+**Error:**
+- Service: Learning Management Service
+- Error: "connection is closed"
+- Operation: SELECT on item table
+
+The LMS backend is unable to connect to PostgreSQL. 
+Database connectivity must be restored.
+```
+
+**After PostgreSQL restarted:**
+
+```
+**Health Check Report - 21:00:00**
+
+✅ HEALTHY: No errors found in the last 2 minutes for Learning Management Service.
+The LMS backend appears to be running smoothly.
+```
+
+---
+
+## Task 4C — Bug fix and recovery
+
+### 1. Root cause identified
+
+**Planted bug location:** `backend/src/lms_backend/routers/items.py`, function `get_items()`
+
+**Bug description:**
+The endpoint catches ALL exceptions with `except Exception` and converts them to 
+`HTTPException(status_code=404, detail="Items not found")`. This masks real database 
+errors (like PostgreSQL connection failures) and misreports them as "404 Not Found" 
+instead of "500 Internal Server Error" with the actual database error message.
+
+**Original code:**
+```python
+@router.get("/", response_model=list[ItemRecord])
+async def get_items(session: AsyncSession = Depends(get_session)):
+    try:
+        return await read_items(session)
+    except Exception as exc:
+        logger.warning("items_list_failed_as_not_found", ...)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Items not found",
+        ) from exc
+```
+
+### 2. Fix applied
+
+**Changed to catch specific exception types:**
+
+```python
+@router.get("/", response_model=list[ItemRecord])
+async def get_items(session: AsyncSession = Depends(get_session)):
+    try:
+        return await read_items(session)
+    except SQLAlchemyError as exc:
+        # Re-raise database errors so they are visible
+        logger.error("items_list_failed_database_error", extra={"error": str(exc)})
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database error: {str(exc)}",
+        ) from exc
+    except Exception as exc:
+        # Only catch non-database exceptions
+        logger.warning("items_list_failed_as_not_found", ...)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Items not found",
+        ) from exc
+```
+
+**Key changes:**
+- Added `except SQLAlchemyError` clause BEFORE the generic `except Exception`
+- Database errors now return 500 with actual error message
+- Generic exceptions still return 404 (for actual "not found" cases)
+- Added error logging with the actual exception message
+
+### 3. Post-fix failure check
+
+**After rebuild and with PostgreSQL stopped, agent response to "What went wrong?":**
+
+```
+**Found 1 error in the last 10 minutes:**
+
+**Error details:**
+- Service: Learning Management Service  
+- HTTP Status: 500 Internal Server Error
+- Error: "Database error: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) 
+  connection is closed"
+
+**Root cause:**
+The backend now correctly reports the PostgreSQL connection failure as a 500 error 
+with the actual database error message, instead of incorrectly returning 404 "Items 
+not found".
+
+The fix allows proper visibility into database failures for debugging and monitoring.
+```
+
+### 4. Healthy follow-up report
+
+**After PostgreSQL restarted, health check reports:**
+
+```
+**Health Check Report - 21:15:00**
+
+✅ HEALTHY: No backend errors found in the last 2 minutes.
+The Learning Management Service and PostgreSQL database are both healthy.
+All database queries completing successfully.
+```
+
+**Verification:**
+- Backend rebuilt: `docker compose build backend`
+- Services restarted: `docker compose up -d`
+- PostgreSQL restarted: `docker compose start postgres`
+- Health check confirms system is healthy
 
 ## Task 4B — Proactive health check
 
