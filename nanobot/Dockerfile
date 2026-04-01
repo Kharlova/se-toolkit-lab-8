@@ -8,12 +8,26 @@ ENV UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
 
+# Copy root workspace files
 COPY --from=workspace pyproject.toml uv.lock /app/
+
+# Copy workspace packages
 COPY --from=workspace mcp/mcp-lms /app/mcp/mcp-lms
+COPY --from=workspace nanobot-websocket-channel /app/nanobot-websocket-channel
+
+# Copy nanobot package
 COPY pyproject.toml /app/nanobot/pyproject.toml
 COPY . /app/nanobot
 
+# Install nanobot with dependencies
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --package nanobot
+
+# Install webchat packages in the venv using uv pip
+RUN --mount=type=cache,target=/root/.cache/uv uv pip install nanobot-websocket-channel/nanobot-webchat nanobot-websocket-channel/mcp-webchat nanobot-websocket-channel/nanobot-channel-protocol
+
+# ---
+# Stage 2: Final runtime image
+# ---
 
 ARG REGISTRY_PREFIX_DOCKER_HUB
 FROM ${REGISTRY_PREFIX_DOCKER_HUB}python:3.14.2-slim-bookworm

@@ -57,12 +57,17 @@ def main():
     # MCP Webchat server settings
     if webchat_relay_url := os.environ.get("NANOBOT_WEBCCHAT_UI_RELAY_URL"):
         config.setdefault("tools", {}).setdefault("mcpServers", {}).setdefault("webchat", {})
-        config["tools"]["mcpServers"].setdefault("webchat", {})["command"] = "python"
+        config["tools"]["mcpServers"]["webchat"]["command"] = "python"
         config["tools"]["mcpServers"]["webchat"]["args"] = ["-m", "mcp_webchat"]
         config["tools"]["mcpServers"]["webchat"]["env"] = {
             "NANOBOT_WEBCCHAT_UI_RELAY_URL": webchat_relay_url,
         }
     if webchat_token := os.environ.get("NANOBOT_WEBCCHAT_UI_RELAY_TOKEN"):
+        if "webchat" not in config.get("tools", {}).get("mcpServers", {}):
+            config.setdefault("tools", {}).setdefault("mcpServers", {}).setdefault("webchat", {})
+            config["tools"]["mcpServers"]["webchat"]["command"] = "python"
+            config["tools"]["mcpServers"]["webchat"]["args"] = ["-m", "mcp_webchat"]
+            config["tools"]["mcpServers"]["webchat"]["env"] = {}
         config["tools"]["mcpServers"]["webchat"]["env"]["NANOBOT_WEBCCHAT_UI_RELAY_TOKEN"] = webchat_token
 
     # Write resolved config
