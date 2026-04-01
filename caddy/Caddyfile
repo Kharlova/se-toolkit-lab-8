@@ -30,7 +30,7 @@
     handle /analytics* {
         reverse_proxy http://backend:{$BACKEND_CONTAINER_PORT}
     }
-    // WebSocket chat endpoint
+    # WebSocket endpoint
     handle /ws/chat {
     reverse_proxy http://nanobot:{$NANOBOT_WEBCHAT_CONTAINER_PORT}
     }
@@ -49,7 +49,7 @@
     handle /openapi.json {
         reverse_proxy http://backend:{$BACKEND_CONTAINER_PORT}
     }
-    // Flutter web client
+    # Flutter volume
     handle_path /flutter* {
     root * /srv/flutter
     try_files {path} /index.html
