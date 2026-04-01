@@ -153,7 +153,27 @@ nanobot-1  | Agent loop started
 
 ## Task 2B — Web client
 
-<!-- Screenshot of a conversation with the agent in the Flutter web app -->
+**Flutter web client deployed at:** `http://<vm-ip>:42002/flutter`
+
+**WebSocket endpoint:** `ws://localhost:42002/ws/chat?access_key=NANOBOT_ACCESS_KEY`
+
+**Test with websocat:**
+```bash
+echo '{"content":"What labs are available?"}' | websocat "ws://localhost:42002/ws/chat?access_key=мой-пароль-для-нанобота"
+```
+
+**Nanobot logs showing webchat channel:**
+```
+nanobot-1  | ✓ Channels enabled: webchat
+nanobot-1  | Starting webchat channel...
+nanobot-1  | Outbound dispatcher started
+```
+
+**Caddy routing:**
+- `/flutter*` → Flutter web client (static files from Docker volume)
+- `/ws/chat` → WebSocket reverse proxy to nanobot:8765
+
+**Access key:** Protected by `NANOBOT_ACCESS_KEY` environment variable
 
 ## Task 3A — Structured logging
 
