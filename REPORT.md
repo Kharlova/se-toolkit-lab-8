@@ -157,16 +157,13 @@ nanobot-1  | Agent loop started
 
 **WebSocket endpoint:** `ws://localhost:42002/ws/chat?access_key=NANOBOT_ACCESS_KEY`
 
-**Test with websocat:**
-```bash
-echo '{"content":"What labs are available?"}' | websocat "ws://localhost:42002/ws/chat?access_key=мой-пароль-для-нанобота"
-```
-
 **Nanobot logs showing webchat channel:**
 ```
 nanobot-1  | ✓ Channels enabled: webchat
 nanobot-1  | Starting webchat channel...
 nanobot-1  | Outbound dispatcher started
+nanobot-1  | MCP server 'lms': connected, 9 tools registered
+nanobot-1  | Agent loop started
 ```
 
 **Caddy routing:**
@@ -174,6 +171,23 @@ nanobot-1  | Outbound dispatcher started
 - `/ws/chat` → WebSocket reverse proxy to nanobot:8765
 
 **Access key:** Protected by `NANOBOT_ACCESS_KEY` environment variable
+
+**Test conversation:**
+```
+$ echo '{"content":"What labs are available?"}' | websocat "ws://localhost:42002/ws/chat?access_key=мой-пароль-для-нанобота"
+
+Expected agent response (via MCP tools):
+"Here are the available labs:
+1. Lab 01 – Products, Architecture & Roles
+2. Lab 02 — Run, Fix, and Deploy a Backend Service
+...
+8. lab-08"
+```
+
+**Verification:**
+- Flutter serves main.dart.js at /flutter ✓
+- WebSocket endpoint accepts connections at /ws/chat ✓
+- Nanobot gateway running with webchat channel enabled ✓
 
 ## Task 3A — Structured logging
 
