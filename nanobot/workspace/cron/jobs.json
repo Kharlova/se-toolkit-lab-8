@@ -1,4 +1,41 @@
 {
   "version": 1,
-  "jobs": []
+  "jobs": [
+    {
+      "id": "a7b33326",
+      "name": "Health check - checking for ba",
+      "enabled": true,
+      "schedule": {
+        "kind": "every",
+        "atMs": null,
+        "everyMs": 120000,
+        "expr": null,
+        "tz": null
+      },
+      "payload": {
+        "kind": "agent_turn",
+        "message": "Health check - checking for backend errors",
+        "deliver": true,
+        "channel": "webchat",
+        "to": "77e0df34-8f85-4825-bbef-fe38809af975"
+      },
+      "state": {
+        "nextRunAtMs": 1775077665554,
+        "lastRunAtMs": 1775077500860,
+        "lastStatus": "ok",
+        "lastError": null,
+        "runHistory": [
+          {
+            "runAtMs": 1775077500860,
+            "status": "ok",
+            "durationMs": 44694,
+            "error": null
+          }
+        ]
+      },
+      "createdAtMs": 1775077380859,
+      "updatedAtMs": 1775077545554,
+      "deleteAfterRun": false
+    }
+  ]
 }
