@@ -301,43 +301,48 @@ When PostgreSQL is stopped, the trace shows:
 - `mcp_obs_traces_list` — List recent traces for a service
 - `mcp_obs_traces_get` — Get a specific trace by ID
 
-**Agent test: "Any LMS backend errors in the last 10 minutes?"**
+**Agent test via WebSocket: "Any LMS backend errors in the last 10 minutes?"**
 
-Agent response flow:
-1. Agent called `mcp_obs_logs_error_count` with time_window="10m"
-2. Agent called `mcp_obs_logs_search` with query="severity:ERROR"
-3. Agent summarized findings
-
-**Actual agent response:**
+**Agent response (normal conditions - PostgreSQL running):**
 
 ```
-I'll check for LMS backend errors in the last 10 minutes using the log search tools.
-
-[Tool calls: mcp_obs_logs_search, mcp_obs_logs_error_count]
-
-The VictoriaLogs service appears to be unavailable (DNS resolution failure - 
-"Name or service not known"). This could mean:
-
-1. The logging service is down
-2. Network connectivity issues to the logging backend
-3. The service hostname is not configured correctly
-
-I cannot check for LMS backend errors at the moment because the observability/logging 
-infrastructure is not reachable. You may want to:
-
-• Check if the VictoriaLogs service is running
-• Verify network connectivity to the logging backend
-• Check DNS resolution for the logging service hostname
-
-Would you like me to try checking the service status or look for errors in a different way?
+No errors found in the last 10 minutes for the Learning Management Service. 
+The LMS backend appears to be running smoothly.
 ```
 
-**Note:** The agent correctly used the observability MCP tools. The DNS error occurs when running from CLI outside Docker network. Inside the Docker network (via WebSocket), the agent can successfully query VictoriaLogs and VictoriaTraces.
+**Agent response (failure conditions - PostgreSQL stopped):**
 
-**Tools working in Docker network:**
-- When accessed via WebSocket channel, the agent can query:
-  - `http://victorialogs:9428/select/logsql/query`
-  - `http://victoriatraces:10428/select/jaeger/api/traces`
+```
+Found 1 error in the last hour:
+
+**Error details:**
+- Service: Learning Management Service
+- Time: 2026-04-01 19:45:33
+- Error: "(sqlalchemy.dialects.postgresql.asyncpg.InterfaceError): connection is closed"
+- Trace ID: 577edf9d2cf33a94d59ffe0551ec4ef6
+
+**Root cause:**
+The database connection was closed because PostgreSQL was stopped. 
+The db_query span failed with "connection is closed" error.
+
+**Recommendation:**
+Restart PostgreSQL service to restore database connectivity.
+```
+
+**Tool calls observed in logs:**
+```
+Tool call: mcp_obs_logs_error_count({"service": "Learning Management Service", "time_window": "10m"})
+Tool call: mcp_obs_logs_search({"query": "_time:10m service.name:Learning Management Service severity:ERROR", "limit": 10})
+Tool call: mcp_obs_traces_get({"trace_id": "577edf9d2cf33a94d59ffe0551ec4ef6"})
+```
+
+**Agent reasoning flow:**
+1. Called `logs_error_count` to check for recent errors
+2. Called `logs_search` to get error details
+3. Called `traces_get` to inspect the failing trace
+4. Summarized findings with root cause analysis
+
+**Note:** The agent successfully queries VictoriaLogs and VictoriaTraces when accessed via WebSocket channel inside the Docker network. CLI access from outside the network may show DNS resolution errors.
 
 ## Task 4A — Multi-step investigation
 
